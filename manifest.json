@@ -4,32 +4,29 @@
   "manifest_version": 2,
   "description": "Export your Kindle book list.",
   "default_locale": "ja",
-  
   "applications": {
     "gecko": {
       "id": "@kindle-bookshelf-exporter"
     }
   },
-  
-  "permissions" : [
+  "permissions": [
     "activeTab",
     "https://www.amazon.co.jp/hz/mycd/myx/*"
   ],
-  
-  "icons" : {
-    "48" : "icon@48.png",
-    "96" : "icon@96.png"
+  "icons": {
+    "48": "icon@48.png",
+    "96": "icon@96.png"
   },
-  
   "browser_action": {
     "default_icon": {
       "32": "icon@32.png",
-      "48" : "icon@48.png",
-      "96" : "icon@96.png"
+      "48": "icon@48.png",
+      "96": "icon@96.png"
     }
   },
-  
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   }
 }
