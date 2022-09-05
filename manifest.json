@@ -9,7 +9,6 @@
     }
   },
   "permissions": [
-    "activeTab",
     "https://www.amazon.co.jp/hz/mycd/myx/*"
   ],
   "icons": {
