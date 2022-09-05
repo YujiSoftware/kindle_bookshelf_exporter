@@ -3,7 +3,6 @@
   "version": "0.9.0",
   "manifest_version": 3,
   "description": "Export your Kindle book list.",
-  "default_locale": "ja",
   "applications": {
     "gecko": {
       "id": "@kindle-bookshelf-exporter"
