@@ -3,7 +3,7 @@
 (function(){
     async function collect(update) {
         const batchSize = 100;
-        const csrfToken = window.wrappedJSObject.csrfToken;
+        const csrfToken = window.wrappedJSObject ? window.wrappedJSObject.csrfToken : window.csrfToken;
         let startIndex = 0;
         let hasMoreItems = true;
         let items = [];
