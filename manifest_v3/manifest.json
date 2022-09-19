@@ -12,7 +12,7 @@
     "scripting"
   ],
   "host_permissions": [
-    "https://www.amazon.co.jp/hz/mycd/myx/*"
+    "https://www.amazon.co.jp/hz/mycd/digital-console/contentlist/booksAll/*"
   ],
   "icons": {
     "48": "icon@48.png",

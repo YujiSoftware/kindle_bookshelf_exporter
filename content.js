@@ -5,39 +5,39 @@
         const batchSize = 100;
         const csrfToken = window.wrappedJSObject ? window.wrappedJSObject.csrfToken : window.csrfToken;
         let startIndex = 0;
-        let hasMoreItems = true;
+        let numberOfItems = Number.MAX_SAFE_INTEGER;
         let items = [];
     
-        while (hasMoreItems) {
+        while (items.length < numberOfItems) {
             const post = JSON.stringify({
-                "param": {
-                    "OwnershipData": {
-                        "sortOrder": "DESCENDING",
-                        "sortIndex": "DATE",
-                        "startIndex": startIndex,
-                        "batchSize": batchSize,
-                        "contentType": "Ebook",
-                        "totalContentCount": 0,
-                        "itemStatus": [
-                            "Active"
-                        ],
-                        "originType": [
-                            "Purchase",
-                            "Pottermore"
-                        ],
-                        "isExtendedMYK": false
-                    }
-                }
+                "contentType": "Ebook",
+                "contentCategoryReference": "booksAll",
+                "itemStatusList": [
+                    "Active"
+                ],
+                "originTypes": [
+                    "Purchase",
+                    "Pottermore"
+                ],
+                "showSharedContent": true,
+                "fetchCriteria": {
+                    "sortOrder": "DESCENDING",
+                    "sortIndex": "DATE",
+                    "startIndex": startIndex,
+                    "batchSize": batchSize,
+                    "totalContentCount": -1
+                },
+                "surfaceType": "Desktop"
             });
     
-            const response = await fetch("https://www.amazon.co.jp/hz/mycd/ajax", {
+            const response = await fetch("https://www.amazon.co.jp/hz/mycd/digital-console/ajax", {
                 "headers": {
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Sec-Fetch-Dest": "empty",
                     "Sec-Fetch-Mode": "cors",
                     "Sec-Fetch-Site": "same-origin"
                 },
-                "body": new URLSearchParams({ "data": post, "csrfToken": csrfToken }),
+                "body": new URLSearchParams({ "activity": "GetContentOwnershipData", "activityInput": post, "csrfToken": csrfToken }),
                 "method": "POST",
                 "credentials": "include"
             });
@@ -46,13 +46,13 @@
                 throw json["error"];
             }
     
-            const data = json["OwnershipData"];
-            hasMoreItems = data["hasMoreItems"];
+            const data = json["GetContentOwnershipData"];
+            numberOfItems = data["numberOfItems"];
             startIndex += batchSize;
     
             items.push(...data["items"]);
     
-            update(items.length, data["numberOfItems"])
+            update(items.length, numberOfItems)
         }
     
         return items;
@@ -126,8 +126,9 @@
     <div style="background-color: gainsboro; padding: 30px; border-radius: 10px;">
         <div style="font-size: 28px; margin-bottom: 1em;">Kindle 本の一覧をダウンロード</div>
         <div class="buttons" style="display: flex; justify-content: center;">
-            <a class="myx-button myx-button-primary csv-download"><span class="myx-button-inner"><button class="myx-button-text">CSV でダウンロード</button></span></a>
-            <a class="myx-button myx-button-primary json-download"><span class="myx-button-inner"><button class="myx-button-text">JSON でダウンロード</button></span></a>
+            <button class="action_button csv-download" style="display: flex; border-radius: 3px; min-height: 1.8rem; border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150); border-style: solid; border-width: 1px; border-image: none 100% / 1 / 0 stretch; cursor: pointer; background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%; word-break: break-word; outline: currentcolor none medium; text-align: center; align-items: center; justify-content: center; width: 10rem;">CSV でダウンロード</button>
+            <div style="padding-right: 0.8rem;"></div>
+            <button class="action_button json-download" style="display: flex; border-radius: 3px; min-height: 1.8rem; border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150); border-style: solid; border-width: 1px; border-image: none 100% / 1 / 0 stretch; cursor: pointer; background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%; word-break: break-word; outline: currentcolor none medium; text-align: center; align-items: center; justify-content: center; width: 10rem;">JSON でダウンロード</button>
         </div>
         <div class="status" style="display: none;">
             <progress class="progress" style="width: 100%;"></progress>
