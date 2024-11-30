@@ -74,8 +74,9 @@
             });
         rows.unshift(['"title"', '"authors"', '"date"', '"status"']);
     
+        const bom  = new Uint8Array([0xEF, 0xBB, 0xBF]);
         const csv = rows.map(r => r.join(",")).join("\n");
-        const blob = new Blob([csv], { type: "text/csv", endings: "native" });
+        const blob = new Blob([bom, csv], { type: "text/csv", endings: "native" });
         const link = document.createElement('a');
         link.download = "kindle.csv";
         link.href = URL.createObjectURL(blob);

@@ -1,6 +1,6 @@
 {
   "name": "Kindle bookshelf exporter",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "manifest_version": 3,
   "description": "Export your Kindle book list.",
   "applications": {
