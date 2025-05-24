@@ -2,6 +2,8 @@
 
 SOURCE = icon@*.png content.js background.js manifest.json
 
+build: firefox chrome
+
 firefox: $(SOURCE)
 	web-ext build
 
