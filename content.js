@@ -189,7 +189,7 @@
     overlay.appendChild(panel);
     
     panel.insertAdjacentHTML('beforeend', `
-    <div style="background-color: gainsboro; padding: 30px; border-radius: 10px;">
+    <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.5);">
         <div style="font-size: 28px; margin-bottom: 1em;">Kindle 本の一覧をダウンロード</div>
         <div class="buttons" style="display: flex; justify-content: center;">
             <button class="action_button booklog-download" style="display: flex; border-radius: 3px; min-height: 1.8rem; border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150); border-style: solid; border-width: 1px; border-image: none 100% / 1 / 0 stretch; cursor: pointer; background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%; word-break: break-word; outline: currentcolor none medium; text-align: center; align-items: center; justify-content: center; width: 10rem;">ブクログ形式で<br>ダウンロード</button>
