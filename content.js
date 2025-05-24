@@ -167,47 +167,77 @@
         link.click();
         URL.revokeObjectURL(link.href);
     };
+
+    var styles = `
+::backdrop {
+    background-color: white;
+    opacity: 0.9;
+}
+
+#bookshelf_exporter {
+    padding: 30px;
+    border: 3px solid #444;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.5);
+}
+
+#bookshelf_exporter h1 {
+    font-size: 28px;
+    margin-bottom: 1em;
+}
+
+#bookshelf_exporter .buttons {
+    display: flex;
+    justify-content: center;
+}
+
+#bookshelf_exporter .buttons > button {
+    display: flex;
+    border-radius: 3px;
+    min-height: 1.8rem;
+    border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150);
+    border-style: solid;
+    border-width: 1px;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%;
+    outline: currentcolor none medium;
+    justify-content: center;
+    width: 10rem;
+}
+
+#bookshelf_exporter .progress {
+    width: 100%;
+}
+#bookshelf_exporter .progress-text {
+    text-align: center;
+}
+    `;
+
+    var styleSheet = document.createElement("style");
+    styleSheet.textContent = styles;
     
-    const overlay = document.createElement("div");
-    Object.assign(overlay.style, {
-        position: "absolute",
-        top: "0px",
-        left: "0px",
-        width: "100%",
-        height: "100%",
-        backgroundColor: "rgba(255,255,255,0.9)",
-        zIndex: 999,
-    });
-    
-    const panel = document.createElement("div");
-    Object.assign(panel.style, {
-        height: "100%",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-    });
-    overlay.appendChild(panel);
-    
-    panel.insertAdjacentHTML('beforeend', `
-    <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.5);">
-        <div style="font-size: 28px; margin-bottom: 1em;">Kindle 本の一覧をダウンロード</div>
+    const dialog = document.createElement("dialog");
+    dialog.id = "bookshelf_exporter"
+    dialog.insertAdjacentHTML('beforeend', `
+    <div>
+        <h1>Kindle 本の一覧をダウンロード</h1>
         <div class="buttons" style="display: flex; justify-content: center;">
-            <button class="action_button booklog-download" style="display: flex; border-radius: 3px; min-height: 1.8rem; border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150); border-style: solid; border-width: 1px; border-image: none 100% / 1 / 0 stretch; cursor: pointer; background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%; word-break: break-word; outline: currentcolor none medium; text-align: center; align-items: center; justify-content: center; width: 10rem;">ブクログ形式で<br>ダウンロード</button>
+            <button class="action_button booklog-download">ブクログ形式で<br>ダウンロード</button>
             <div style="padding-right: 0.8rem;"></div>
-            <button class="action_button csv-download" style="display: flex; border-radius: 3px; min-height: 1.8rem; border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150); border-style: solid; border-width: 1px; border-image: none 100% / 1 / 0 stretch; cursor: pointer; background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%; word-break: break-word; outline: currentcolor none medium; text-align: center; align-items: center; justify-content: center; width: 10rem;">CSV 形式で<br>ダウンロード</button>
+            <button class="action_button csv-download">CSV 形式で<br>ダウンロード</button>
             <div style="padding-right: 0.8rem;"></div>
-            <button class="action_button json-download" style="display: flex; border-radius: 3px; min-height: 1.8rem; border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150); border-style: solid; border-width: 1px; border-image: none 100% / 1 / 0 stretch; cursor: pointer; background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%; word-break: break-word; outline: currentcolor none medium; text-align: center; align-items: center; justify-content: center; width: 10rem;">JSON 形式で<br>ダウンロード</button>
+            <button class="action_button json-download">JSON 形式で<br>ダウンロード</button>
         </div>
         <div class="status" style="display: none;">
-            <progress class="progress" style="width: 100%;"></progress>
-            <p class="progress-text" style="text-align: center;">処理中 (<span class="progress-value">---</span> / <span class="progress-max">---</span>)</p>
+            <progress class="progress"></progress>
+            <p class="progress-text">処理中 (<span class="progress-value">---</span> / <span class="progress-max">---</span>)</p>
         </div>
     </div>`);
     
     async function run(download) {
-        const buttons = panel.getElementsByClassName("buttons")[0];
+        const buttons = dialog.getElementsByClassName("buttons")[0];
         buttons.style.display = "none";
-        const status = panel.getElementsByClassName("status")[0];
+        const status = dialog.getElementsByClassName("status")[0];
         status.style.display = "block";
     
         const progress = status.getElementsByClassName("progress")[0];
@@ -227,19 +257,26 @@
         progressText.innerText = "完了";
     }
     
-    panel.getElementsByClassName("booklog-download")[0].addEventListener("click", async function (event) {
+    dialog.getElementsByClassName("booklog-download")[0].addEventListener("click", async function (event) {
         await run(downloadBooklog);
     });
     
-    panel.getElementsByClassName("csv-download")[0].addEventListener("click", async function (event) {
+    dialog.getElementsByClassName("csv-download")[0].addEventListener("click", async function (event) {
         await run(downloadCSV);
     });
     
-    panel.getElementsByClassName("json-download")[0].addEventListener("click", async function (event) {
+    dialog.getElementsByClassName("json-download")[0].addEventListener("click", async function (event) {
         await run(downloadJSON);
     });
-    
+
+    dialog.addEventListener("cancel", (event) => {
+        event.preventDefault();
+    });    
+
     window.scrollTo(0, 0);
-    document.body.appendChild(overlay);
     document.body.style.overflow = "hidden";
+
+    document.body.appendChild(dialog);
+    document.head.appendChild(styleSheet);
+    dialog.showModal();
 })();
