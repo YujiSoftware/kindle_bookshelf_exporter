@@ -58,6 +58,71 @@
         return items;
     };
     
+    function downloadBooklog(items) {
+        const formatDate = function(time) {
+            const pad = (n) => n.toString().padStart(2, "0");
+            const d = new Date(time);
+            return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        }
+
+        // Shift-JIS 表現
+        const textEncoder = new TextEncoder();
+        const doubleQuote = textEncoder.encode('"');
+        const comma = textEncoder.encode(",");
+        const lineBreak = textEncoder.encode("\r\n");
+        const one = textEncoder.encode("1");
+        const 読み終わった = Uint8Array.of(0x93, 0xc7, 0x82, 0xdd, 0x8f, 0x49, 0x82, 0xed, 0x82, 0xc1, 0x82, 0xbd);
+        const 積読 = Uint8Array.of(0x90, 0xcf, 0x93, 0xc7);
+
+        // Shift-JIS形式
+        // ----
+        // サービスID, アイテムID, 13桁ISBN, カテゴリ, 評価, 読書状況, レビュー, タグ, 読書メモ(非公開), 登録日時, 読了日
+        // "1","B00005S8LI","","-","4","読み終わった","","ジブリ","","2012-03-06 17:40:08","2012-03-06 17:41:39"
+        const rows =
+            items.map(item => {
+                const row = [
+                    one,
+                    textEncoder.encode(item["asin"] ?? ""),
+                    "",
+                    "",
+                    "",
+                    item["readStatus"] == "READ" ? 読み終わった : 積読,
+                    "",
+                    "",
+                    "",
+                    textEncoder.encode(formatDate(item["acquiredTime"])),
+                    "",
+                ];
+    
+                const length = row.map(c => c.length + doubleQuote.length * 2 + comma.length).reduce((sum, r) => sum + r, 0) + lineBreak.length;
+                const a = new Uint8Array(length);
+                let offset = 0;
+                for (const column of row) {
+                    a.set(doubleQuote, offset);
+                    offset += doubleQuote.length;
+
+                    a.set(column, offset);
+                    offset += column.length;
+
+                    a.set(doubleQuote, offset);
+                    offset += doubleQuote.length;
+
+                    a.set(comma, offset)
+                    offset += comma.length;
+                }
+                a.set(lineBreak, offset);
+
+                return a;
+            });
+    
+        const blob = new Blob([...rows], { type: "text/csv", endings: "transparent" });
+        const link = document.createElement('a');
+        link.download = "kindle.csv";
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+    };
+    
     function downloadCSV(items) {
         const rows =
             items.map(item => {
@@ -127,9 +192,11 @@
     <div style="background-color: gainsboro; padding: 30px; border-radius: 10px;">
         <div style="font-size: 28px; margin-bottom: 1em;">Kindle 本の一覧をダウンロード</div>
         <div class="buttons" style="display: flex; justify-content: center;">
-            <button class="action_button csv-download" style="display: flex; border-radius: 3px; min-height: 1.8rem; border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150); border-style: solid; border-width: 1px; border-image: none 100% / 1 / 0 stretch; cursor: pointer; background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%; word-break: break-word; outline: currentcolor none medium; text-align: center; align-items: center; justify-content: center; width: 10rem;">CSV でダウンロード</button>
+            <button class="action_button booklog-download" style="display: flex; border-radius: 3px; min-height: 1.8rem; border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150); border-style: solid; border-width: 1px; border-image: none 100% / 1 / 0 stretch; cursor: pointer; background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%; word-break: break-word; outline: currentcolor none medium; text-align: center; align-items: center; justify-content: center; width: 10rem;">ブクログ形式で<br>ダウンロード</button>
             <div style="padding-right: 0.8rem;"></div>
-            <button class="action_button json-download" style="display: flex; border-radius: 3px; min-height: 1.8rem; border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150); border-style: solid; border-width: 1px; border-image: none 100% / 1 / 0 stretch; cursor: pointer; background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%; word-break: break-word; outline: currentcolor none medium; text-align: center; align-items: center; justify-content: center; width: 10rem;">JSON でダウンロード</button>
+            <button class="action_button csv-download" style="display: flex; border-radius: 3px; min-height: 1.8rem; border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150); border-style: solid; border-width: 1px; border-image: none 100% / 1 / 0 stretch; cursor: pointer; background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%; word-break: break-word; outline: currentcolor none medium; text-align: center; align-items: center; justify-content: center; width: 10rem;">CSV 形式で<br>ダウンロード</button>
+            <div style="padding-right: 0.8rem;"></div>
+            <button class="action_button json-download" style="display: flex; border-radius: 3px; min-height: 1.8rem; border-color: rgb(173, 177, 184) rgb(162, 166, 172) rgb(141, 144, 150); border-style: solid; border-width: 1px; border-image: none 100% / 1 / 0 stretch; cursor: pointer; background: rgba(0, 0, 0, 0) linear-gradient(rgb(247, 248, 250), rgb(231, 233, 236)) repeat scroll 0% 0%; word-break: break-word; outline: currentcolor none medium; text-align: center; align-items: center; justify-content: center; width: 10rem;">JSON 形式で<br>ダウンロード</button>
         </div>
         <div class="status" style="display: none;">
             <progress class="progress" style="width: 100%;"></progress>
@@ -159,6 +226,10 @@
         const progressText = status.getElementsByClassName("progress-text")[0];
         progressText.innerText = "完了";
     }
+    
+    panel.getElementsByClassName("booklog-download")[0].addEventListener("click", async function (event) {
+        await run(downloadBooklog);
+    });
     
     panel.getElementsByClassName("csv-download")[0].addEventListener("click", async function (event) {
         await run(downloadCSV);
