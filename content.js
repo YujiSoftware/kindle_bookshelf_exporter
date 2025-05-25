@@ -130,14 +130,15 @@
                     item["title"],
                     item["authors"],
                     item["acquiredDate"],
-                    item["readStatus"]
+                    item["readStatus"],
+                    item["asin"],
                 ];
     
                 return row
                     .map(v => v ?? "")
                     .map(v => '"' + v.replaceAll('"', '""') + '"')
             });
-        rows.unshift(['"title"', '"authors"', '"date"', '"status"']);
+        rows.unshift(['"title"', '"authors"', '"date"', '"status"', '"asin"']);
     
         const bom  = new Uint8Array([0xEF, 0xBB, 0xBF]);
         const csv = rows.map(r => r.join(",")).join("\n");
